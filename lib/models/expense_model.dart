@@ -1,12 +1,11 @@
-// expense_model.dart
 import 'package:hive/hive.dart';
 
 part 'expense_model.g.dart';
 
 @HiveType(typeId: 0)
-class Expense {
+class Expense extends HiveObject {
   @HiveField(0)
-  late int id;
+  late int key;
 
   @HiveField(1)
   late String title;
@@ -14,6 +13,6 @@ class Expense {
   @HiveField(2)
   late double amount;
 
-
-  Expense({required this.id, required this.title, required this.amount});
+  Expense({required this.key, required this.title, required this.amount});
 }
+

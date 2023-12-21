@@ -17,7 +17,7 @@ class ExpenseAdapter extends TypeAdapter<Expense> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Expense(
-      id: fields[0] as int,
+      key: fields[0] as int,
       title: fields[1] as String,
       amount: fields[2] as double,
     );
@@ -28,7 +28,7 @@ class ExpenseAdapter extends TypeAdapter<Expense> {
     writer
       ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.id)
+      ..write(obj.key)
       ..writeByte(1)
       ..write(obj.title)
       ..writeByte(2)

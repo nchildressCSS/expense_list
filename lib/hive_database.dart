@@ -8,9 +8,14 @@ class HiveDatabase {
 
   Future<void> addExpense(Expense expense) async {
     final box = await Hive.openBox<Expense>(_expenseBoxName);
+
+    // Ensure that the key is within the valid range for integer keys
+    final validKey = expense.key % 0xFFFFFFFF;
+
+    // Use add method to add the expense with a specific key
     await box.add(expense);
-    print('Expense added: $expense');
   }
+
 
   Future<List<Expense>> getExpenses() async {
     final box = await Hive.openBox<Expense>(_expenseBoxName);
@@ -27,9 +32,15 @@ class HiveDatabase {
 
   Future<void> updateExpense(Expense expense) async {
     final box = await Hive.openBox<Expense>(_expenseBoxName);
-    await box.put(expense.id, expense);
-    print('Expense updated: $expense');
+
+    // Ensure that the key is within the valid range for integer keys
+    final validKey = expense.key % 0xFFFFFFFF;
+
+    // Use put method to update the expense with a specific key
+    await box.put(validKey, expense);
   }
+
+
 
   Future<void> initFlutter() async {
     final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();

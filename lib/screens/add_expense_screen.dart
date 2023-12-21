@@ -1,4 +1,3 @@
-// add_expense_screen.dart
 import 'package:flutter/material.dart';
 import '../hive_database.dart';
 import '../models/expense_model.dart';
@@ -15,45 +14,56 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-  final HiveDatabase _hiveDatabase = HiveDatabase(); // Declare _hiveDatabase here
+  final HiveDatabase _hiveDatabase = HiveDatabase();
 
   @override
   void initState() {
     super.initState();
 
     if (widget.editingExpense != null) {
-      // If editing an existing expense, populate the fields with its data
       _titleController.text = widget.editingExpense!.title;
       _amountController.text = widget.editingExpense!.amount.toString();
     }
   }
 
-  void _addOrUpdateExpense() async {
+  void _saveExpense() async {
     final String title = _titleController.text;
     final double amount = double.parse(_amountController.text);
-    final DateTime date = DateTime.now();
-
-    final Expense newExpense = Expense(id: widget.editingExpense?.id ?? 0, title: title, amount: amount);
 
     if (widget.editingExpense != null) {
-      // If editing an existing expense, update it
-      await _hiveDatabase.updateExpense(newExpense);
+      final Expense updatedExpense = Expense(
+        key: widget.editingExpense!.key,
+        title: title,
+        amount: amount,
+      );
+
+      await _hiveDatabase.updateExpense(updatedExpense);
+      Navigator.pop(context, updatedExpense); // Return the updated expense
     } else {
-      // If adding a new expense, add it
+      final Expense newExpense = Expense(
+        key: DateTime.now().millisecondsSinceEpoch, // Ensure a unique key
+        title: title,
+        amount: amount,
+      );
       await _hiveDatabase.addExpense(newExpense);
+      Navigator.pop(context, newExpense); // Return the new expense
     }
-
-    print('Expense added/updated: $newExpense');
-
-    Navigator.pop(context); // Close the add expense screen
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.editingExpense != null ? 'Edit Expense' : 'Add Expense'),
+        title: Text(
+          widget.editingExpense != null ? 'Edit Expense' : 'Add Expense',
+          style: const TextStyle(
+            fontFamily: 'BrownFox',
+            fontSize: 50.0,
+          ),
+        ),
         backgroundColor: Colors.green,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -62,18 +72,44 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'Title'),
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green),
+                ),
+              ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _amountController,
-              decoration: InputDecoration(labelText: 'Amount'),
+              decoration: const InputDecoration(labelText: 'Amount'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _addOrUpdateExpense,
-              child: Text(widget.editingExpense != null ? 'Update Expense' : 'Add Expense'),
+            const SizedBox(height: 16.0),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: _saveExpense,
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                        return Colors.green;
+                      },
+                    ),
+                    minimumSize: MaterialStateProperty.all(const Size(300, 40)),
+                  ),
+                  child: Text(
+                    widget.editingExpense != null
+                        ? 'Update Expense'
+                        : 'Save Expense',
+                    style: const TextStyle(
+                      fontFamily: 'BrownFox',
+                      fontSize: 30.0,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
